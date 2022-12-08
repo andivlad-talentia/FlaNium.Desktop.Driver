@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "FlaNium.Desktop.Driver": {
+      "commandName": "Project",
+      "commandLineArgs": "--url-base=\"/wd/hub\" -p 4740 -v -h \"172.24.48.1\""
+    }
+  }
+}

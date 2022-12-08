@@ -47,7 +47,7 @@
         {
             var contentLength = 0;
             string contentLengthString;
-            if (headers.TryGetValue("Content-Length", out contentLengthString))
+            if (headers.TryGetValue("content-length", out contentLengthString))
             {
                 contentLength = Convert.ToInt32(contentLengthString, CultureInfo.InvariantCulture);
             }
@@ -67,7 +67,7 @@
         {
             var headers = new Dictionary<string, string>();
             string header;
-            while (!string.IsNullOrEmpty(header = textReader.ReadLine()))
+            while (!string.IsNullOrEmpty(header = textReader.ReadLine().ToLower()))
             {
                 var splitHeader = header.Split(':');
                 headers.Add(splitHeader[0], splitHeader[1].Trim(' '));
