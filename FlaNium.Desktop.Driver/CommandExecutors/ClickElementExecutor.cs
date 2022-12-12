@@ -7,7 +7,7 @@
         protected override string DoImpl()
         {
             var registeredKey = this.ExecutedCommand.Parameters["ID"].ToString();
-            this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey).Click();
+            this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey).Click(DriverManager);
 
             return this.JsonResponse();
         }

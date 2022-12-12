@@ -8,7 +8,7 @@ using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Input;
 using FlaUI.Core.Tools;
-using FlaUI.UIA3;
+using FlaUI.UIA2;
 
 
 using System.ComponentModel;
@@ -17,14 +17,16 @@ using System.Drawing;
 using System.IO;
 
 using System.Threading;
+using System.Xml.Linq;
+using OpenQA.Selenium;
 
 
 namespace FlaNium.Desktop.Driver.FlaUI
 {
     class DriverManager
     {
-        private static TimeSpan implicitTimeout = new TimeSpan(0, 0, 30);
-        private static Window _currentWindow;
+        private static TimeSpan implicitTimeout = new TimeSpan(0, 0, 30);       
+        private static readonly string ROOT_APP_NAME = "root";
 
         public static TimeSpan ImplicitTimeout
         {
@@ -40,86 +42,65 @@ namespace FlaNium.Desktop.Driver.FlaUI
 
         public static string AutomationIdWindowForIgnore { get; } = "ProgressWindowForm";
 
-        public static AutomationBase Automation { get; } = (AutomationBase)new UIA3Automation();
+        public static AutomationBase Automation { get; } = (AutomationBase)new UIA2Automation();
 
-        public static Application Application { get; private set; }
+        public Application Application { get; private set; }
+        public string ApplicationName { get; private set; }
+        public Window RootElement { get; private set; }
+        public string SessionId { get; set; }
 
-        public static void CloseDriver(bool isDebug = false)
+        private DriverManager(string sessionId)
         {
-            try
+            if (string.IsNullOrEmpty(sessionId))
             {
-                if (!isDebug)
-                    DriverManager.Application?.Close();
-                DriverManager.Application?.Dispose();
+                throw new ArgumentNullException(nameof(sessionId));
             }
-            catch
-            {
-            }
-            DriverManager.Application = (Application)null;
-            DriverManager._currentWindow = (Window)null;
+            SessionId = sessionId;
+            DriverManagerCollection.Instance[SessionId] = this;
+        }
+
+        public void CloseDriver(bool isDebug = false)
+        {
+            CloseApplication();
+            DriverManagerCollection.Instance[SessionId] = null;
+        }
+
+        public void CloseApplication()
+        {
+            RootElement = null;
+            Application?.Close();
+            Application = null;
             GC.Collect();
         }
 
-        public static void CloseAllApplication(string name)
+        public Window[] GetWindows()
         {
             try
             {
-                if (name != null)
+                Window mainWindow = Application.GetMainWindow(DriverManager.Automation);
+                return new List<Window>() 
                 {
-                    string str = name;
-                    string[] separator = new string[2]
-                    {
-            ".exe",
-            ".EXE"
-                    };
-                    foreach (Process process in Process.GetProcessesByName(str.Split(separator, StringSplitOptions.None)[0]))
-                    {
-                        try
-                        {
-                            process.Kill();
-                        }
-                        catch
-                        {
-                        }
-                    }
+                    mainWindow
                 }
+                .Union<Window>((IEnumerable<Window>)mainWindow.ModalWindows).ToArray();
             }
             catch
             {
-            }
-            DriverManager.Application = (Application)null;
-            DriverManager._currentWindow = (Window)null;
-            GC.Collect();
-        }
-
-        public static Window[] GetWindows()
-        {
-            try
-            {
-                Window mainWindow = DriverManager.Application.GetMainWindow(DriverManager.Automation);
-                Window[] array = new List<Window>()
-        {
-          mainWindow
-        }.Union<Window>((IEnumerable<Window>)mainWindow.ModalWindows).Union<Window>((IEnumerable<Window>)DriverManager._currentWindow.ModalWindows).Where<Window>((Func<Window, bool>)(x => x.Properties.AutomationId?.ValueOrDefault != DriverManager.AutomationIdWindowForIgnore)).ToArray<Window>();
-                return ((IEnumerable<Window>)array).Any<Window>() ? array : throw new Exception();
-            }
-            catch
-            {
-                return DriverManager.GetAllProcessWindows();
+                return GetAllProcessWindows();
             }
         }
 
-        private static Window[] GetAllProcessWindows()
+        private Window[] GetAllProcessWindows()
         {
-            Window[] allTopLevelWindows = DriverManager.Application.GetAllTopLevelWindows(DriverManager.Automation);
+            Window[] allTopLevelWindows = Application.GetAllTopLevelWindows(DriverManager.Automation);
             return ((IEnumerable<Window>)allTopLevelWindows).Union<Window>(((IEnumerable<Window>)allTopLevelWindows).SelectMany<Window, Window>((Func<Window, IEnumerable<Window>>)(w => (IEnumerable<Window>)w.ModalWindows))).Where<Window>((Func<Window, bool>)(x => x.Properties.AutomationId?.ValueOrDefault != DriverManager.AutomationIdWindowForIgnore)).ToArray<Window>();
         }
 
-        public static Window GetActiveWindow()
+        public Window GetActiveWindow()
         {
-            if (DriverManager._currentWindow == null)
+            if (RootElement == null)
             {
-                DriverManager._currentWindow = Retry.While<Window>((Func<Window>)(() => DriverManager.Application.GetMainWindow(DriverManager.Automation)), (Func<Window, bool>)(x =>
+                RootElement = Retry.While<Window>((Func<Window>)(() => Application.GetMainWindow(DriverManager.Automation)), (Func<Window, bool>)(x =>
                 {
                     try
                     {
@@ -131,97 +112,108 @@ namespace FlaNium.Desktop.Driver.FlaUI
                     }
                 }), new TimeSpan?(TimeSpan.FromMinutes(5.0))).Result;
 
-                if (DriverManager._currentWindow.FindAllDescendants().Length == 0)
+                if (RootElement.FindAllDescendants().Length == 0)
                 {
-                    DriverManager._currentWindow = DriverManager.Application.GetAllTopLevelWindows(DriverManager.Automation)[0];
+                    RootElement = Application.GetAllTopLevelWindows(DriverManager.Automation)[0];
                 }
 
             }
-            return DriverManager._currentWindow;
+            return RootElement;
         }
 
-        public static Window StartApp(string appPath, string arguments, bool debugDoNotDeploy = false)
+        public static DriverManager StartApp(string appPath, string arguments, string sessionId, int launchDelay, bool hasNoGuiWindow)
         {
             appPath = appPath.Replace("\\\\", "\\");
             string name = appPath.Substring(appPath.LastIndexOf('\\') + 1);
-          
-            if (!debugDoNotDeploy)
-            {
-                DriverManager.CloseDriver();
-                DriverManager.CloseAllApplication(name);
-            }
 
-            if (!File.Exists(appPath))
+            var driverManager = new DriverManager(sessionId);
+            if (appPath.ToLower() == ROOT_APP_NAME)
             {
-                // Добавлен механизм запуска приложений из WindowsStore.
+                driverManager.RootElement = Automation.GetDesktop().AsWindow();
+                launchDelay = 0;
+            } 
+            else if (!File.Exists(appPath))
+            {
+                // WindowsStore
                 try
                 {
-                    DriverManager.Application = Application.LaunchStoreApp(name);
-                    DriverManager.Application.WaitWhileBusy(new TimeSpan?(TimeSpan.FromSeconds(5.0)));
-
-                    Window activeWindow = DriverManager.GetActiveWindow();
-                    activeWindow.FindAllChildren();
-                    return activeWindow;
+                    driverManager.Application = Application.LaunchStoreApp(name);
+                    driverManager.Application.WaitWhileBusy(new TimeSpan?(TimeSpan.FromSeconds(launchDelay)));
                 }
-                
+
                 catch (Win32Exception)
                 {
-                    DriverManager.CloseDriver();
-                    DriverManager.CloseAllApplication(name);
+                    driverManager.CloseDriver();
                 }
 
                 catch (Exception)
                 {
-                    throw new FileNotFoundException(string.Format("Некорректный путь ({0})", (object)appPath));
+                    throw new FileNotFoundException(appPath);
                 }
-
             }
+            else
+            {
+                Directory.SetCurrentDirectory(Path.GetDirectoryName(appPath));
+                ProcessStartInfo processStartInfo = new ProcessStartInfo()
+                {
+                    FileName = appPath,
+                    Arguments = arguments
+                };
+                try
+                {
+                    driverManager.Application = Application.Launch(processStartInfo);
+                    if (hasNoGuiWindow)
+                    {
+                        return driverManager;
+                    }
+                    driverManager.Application.WaitWhileBusy(new TimeSpan?(TimeSpan.FromSeconds(5)));
 
-            Directory.SetCurrentDirectory(Path.GetDirectoryName(appPath));
-            ProcessStartInfo processStartInfo = new ProcessStartInfo()
-            {
-                FileName = appPath
-            };
-            switch (arguments)
-            {
-                case "":
-                case null:
-                    try
+                    if (driverManager.Application.HasExited)
                     {
-                        DriverManager.Application = debugDoNotDeploy ? Application.AttachOrLaunch(processStartInfo) : Application.Launch(processStartInfo);
-                        DriverManager.Application.WaitWhileBusy(new TimeSpan?(TimeSpan.FromSeconds(5.0)));
+                        driverManager.Application = Application.AttachOrLaunch(processStartInfo);
+                        driverManager.Application.WaitWhileBusy(new TimeSpan?(TimeSpan.FromSeconds(5)));
                     }
-                    catch (Win32Exception)
-                    {
-                        DriverManager.CloseDriver();
-                        DriverManager.CloseAllApplication(name);
-                    }
-                    Window activeWindow = DriverManager.GetActiveWindow();
-                    activeWindow.FindAllChildren();
-                    return activeWindow;
-                default:
-                    processStartInfo.Arguments = arguments;
-                    goto case "";
+                }
+                catch (Win32Exception)
+                {
+                    driverManager.CloseDriver();
+                }
             }
+            Task.Delay(launchDelay * 1000).Wait();
+            if (null != driverManager?.Application?.MainWindowHandle)
+            {
+                var mainWindow = Automation.FromHandle(driverManager.Application.MainWindowHandle).AsWindow();
+                driverManager.RootElement = mainWindow;
+                mainWindow.FindAllChildren();
+            }
+            return driverManager;
         }
 
-        public static void Click(Point p)
+        public static DriverManager AttachToWindowHandle(IntPtr handle, string sessionId)
         {
-            DriverManager.GetActiveWindow().SetForeground();
+            return new DriverManager(sessionId)
+            {
+                RootElement = Automation.FromHandle(handle).AsWindow()
+        };
+        }
+
+        public void Click(Point p)
+        {
+            (GetActiveWindow() as Window)?.SetForeground();
             Mouse.Position = p;
             Mouse.Click(MouseButton.Left);
         }
 
-        public static async Task<Task<RetryResult<Window>>> FindWindow(
+        public async Task<Task<RetryResult<Window>>> FindWindow(
           string title,
           TimeSpan timeout)
         {
-            Func<RetryResult<Window>> function1 = (Func<RetryResult<Window>>)(() => Retry.While<Window>((Func<Window>)(() => ((IEnumerable<Window>)DriverManager.GetAllProcessWindows()).FirstOrDefault<Window>((Func<Window, bool>)(x => x.Title == title))), (Func<Window, bool>)(x => x == null), new TimeSpan?(timeout)));
-            Func<RetryResult<Window>> function2 = (Func<RetryResult<Window>>)(() => Retry.While<Window>((Func<Window>)(() => ((IEnumerable<Window>)DriverManager.GetWindows()).FirstOrDefault<Window>((Func<Window, bool>)(x => x.Title == title))), (Func<Window, bool>)(x => x == null), new TimeSpan?(timeout)));
+            Func<RetryResult<Window>> function1 = (Func<RetryResult<Window>>)(() => Retry.While<Window>((Func<Window>)(() => ((IEnumerable<Window>)GetAllProcessWindows()).FirstOrDefault<Window>((Func<Window, bool>)(x => x.Title == title))), (Func<Window, bool>)(x => x == null), new TimeSpan?(timeout)));
+            Func<RetryResult<Window>> function2 = (Func<RetryResult<Window>>)(() => Retry.While<Window>((Func<Window>)(() => ((IEnumerable<Window>)GetWindows()).FirstOrDefault<Window>((Func<Window, bool>)(x => x.Title == title))), (Func<Window, bool>)(x => x == null), new TimeSpan?(timeout)));
             return await Task.WhenAny<RetryResult<Window>>(Task.Run<RetryResult<Window>>(function1), Task.Run<RetryResult<Window>>(function2));
         }
 
-        public static void SwitchWindow(string title)
+        public void SwitchWindow(string title)
         {
             long timeMilliseconds = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             Task<RetryResult<Window>> task = (Task<RetryResult<Window>>)null;
@@ -229,11 +221,11 @@ namespace FlaNium.Desktop.Driver.FlaUI
             {
                 if (title == "")
                 {
-                    DriverManager._currentWindow = DriverManager.Application.GetMainWindow(DriverManager.Automation);
-                    DriverManager._currentWindow.SetForeground();
+                    RootElement = Application.GetMainWindow(DriverManager.Automation);
+                    RootElement.SetForeground();
                     return;
                 }
-                Task<Task<RetryResult<Window>>> window = DriverManager.FindWindow(title, DriverManager.ImplicitTimeout);
+                Task<Task<RetryResult<Window>>> window = FindWindow(title, DriverManager.ImplicitTimeout);
                 window.Wait();
                 task = !window.IsFaulted ? window.Result : throw window.Exception;
                 if (task.IsFaulted)
@@ -243,15 +235,15 @@ namespace FlaNium.Desktop.Driver.FlaUI
             }
             if (task.IsFaulted)
                 throw new Exception(string.Format("Fail to get Window {0}", (object)title), (Exception)task.Exception);
-            DriverManager._currentWindow = task.Result.Result;
-            DriverManager._currentWindow.SetForeground();
+            RootElement = task.Result.Result;
+            RootElement.SetForeground();
         }
 
-        public static void PrintTimestamp(string comment)
+        public void PrintTimestamp(string comment)
         {
         }
 
-        public static string DownloadTempFile(string filename)
+        public string DownloadTempFile(string filename)
         {
             string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory.Replace("\\", "\\\\").TrimEnd('\\', '/'), filename);
             if (!File.Exists(path))
@@ -262,12 +254,6 @@ namespace FlaNium.Desktop.Driver.FlaUI
             byte[] inArray = File.ReadAllBytes(path);
             File.Delete(path);
             return Convert.ToBase64String(inArray);
-        }
-
-
-        public static void AttachToProcess(string processName)
-        {
-            DriverManager.Application = Application.Attach(processName);
         }
     }
 }

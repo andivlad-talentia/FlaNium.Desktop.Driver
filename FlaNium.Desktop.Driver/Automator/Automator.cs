@@ -2,6 +2,7 @@
 
 namespace FlaNium.Desktop.Driver.Automator
 {
+    using System;
     #region using
 
     using System.Collections.Generic;
@@ -65,7 +66,7 @@ namespace FlaNium.Desktop.Driver.Automator
                     {
                         if (sessionId == null)
                         {
-                            sessionId = "AwesomeSession";
+                            sessionId = Guid.NewGuid().ToString();
                         }
 
                         instance = new Automator(sessionId);

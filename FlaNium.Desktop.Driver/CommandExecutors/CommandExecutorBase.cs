@@ -12,6 +12,7 @@
     using FlaNium.Desktop.Driver.Exceptions;
     using System.Threading.Tasks;
     using System.Collections.Generic;
+    using FlaNium.Desktop.Driver.FlaUI;
 
     #endregion
 
@@ -22,6 +23,7 @@
 
         protected Automator Automator { get; set; }
 
+        public DriverManager DriverManager => DriverManagerCollection.Instance[ExecutedCommand.SessionId];
 
         public CommandResponse Do()
         {
@@ -32,8 +34,11 @@
 
             try
             {
-                var session = this.ExecutedCommand.SessionId;
-                this.Automator = Automator.InstanceForSession(session);
+                this.Automator = Automator.InstanceForSession(this.ExecutedCommand.SessionId);
+                if (this.ExecutedCommand.SessionId == null)
+                {
+                    this.ExecutedCommand.SessionId = this.Automator.Session;
+                }
                 return CommandResponse.Create(HttpStatusCode.OK, this.DoInOtherThread());
             }
             catch (AutomationException exception)

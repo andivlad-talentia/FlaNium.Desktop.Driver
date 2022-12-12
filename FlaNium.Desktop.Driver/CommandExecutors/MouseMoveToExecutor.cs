@@ -6,6 +6,8 @@
     using global::FlaUI.Core.Input;
     using FlaNium.Desktop.Driver.FlaUI;
     using FlaNium.Desktop.Driver.Common;
+    using System.Drawing;
+    using global::FlaUI.Core.Tools;
 
     #endregion
 
@@ -52,7 +54,15 @@
 
             DriverManager.GetActiveWindow();
 
-            Mouse.MoveTo(resultPoint.X, resultPoint.Y);
+            Point position = Mouse.Position;
+            Point point2 = new Point(resultPoint.X, resultPoint.Y);
+            if (!(position == point2))
+            {
+                double num = position.Distance(resultPoint.X, resultPoint.Y);
+                Console.Write(num);
+            }
+
+                Mouse.MoveTo(resultPoint.X, resultPoint.Y);
 
             return this.JsonResponse();
            

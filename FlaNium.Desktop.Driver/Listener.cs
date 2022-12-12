@@ -5,6 +5,7 @@
     using System;
     using System.Globalization;
     using System.IO;
+    using System.Linq;
     using System.Net;
     using System.Net.Sockets;
 
@@ -178,6 +179,10 @@
         private CommandResponse ProcessCommand(Command command)
         {
             Logger.Info("COMMAND {0}\r\n{1}", command.Name, command.Parameters.ToString());
+            if (command.SessionId == null)
+            {
+                command.TrySetSessionIdFromParameters();
+            }
             var executor = this.executorDispatcher.GetExecutor(command.Name);
             executor.ExecutedCommand = command;
             var respnose = executor.Do();

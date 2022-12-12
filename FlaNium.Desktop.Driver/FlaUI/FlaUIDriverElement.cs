@@ -22,11 +22,11 @@ namespace FlaNium.Desktop.Driver.FlaUI
             this.FlaUIElement = uiItem;
         }
 
-        public void Click()
+        public void Click(DriverManager driver)
         {
             if (this.FlaUIElement.Properties.ControlType.ValueOrDefault != ControlType.Menu)
             {
-                DriverManager.Application.WaitWhileBusy(new TimeSpan?(DriverManager.ImplicitTimeout));
+                driver.Application.WaitWhileBusy(new TimeSpan?(DriverManager.ImplicitTimeout));
             }
             else
             {
@@ -41,24 +41,24 @@ namespace FlaNium.Desktop.Driver.FlaUI
             }
             catch (Exception)
             {
-                DriverManager.Click(this.Properties.ClickablePoint);
+                driver.Click(this.Properties.ClickablePoint);
             }
         }
 
         public string Text => (string)this.FlaUIElement.Properties.Name;
 
-        public void Type(string text)
+        public void Type(string text, DriverManager driver)
         {
             
             this.FlaUIElement.Click();
-            this.Clear();
+            this.Clear(driver);
             Keyboard.Type(text);
 
         }
 
-        public void Clear()
+        public void Clear(DriverManager driver)
         {
-            DriverManager.Application.WaitWhileBusy(new TimeSpan?(DriverManager.ImplicitTimeout));
+            driver.Application.WaitWhileBusy(new TimeSpan?(DriverManager.ImplicitTimeout));
             this.FlaUIElement.Focus();
             TextBox textBox = this.FlaUIElement.AsTextBox();
             if (textBox == null)

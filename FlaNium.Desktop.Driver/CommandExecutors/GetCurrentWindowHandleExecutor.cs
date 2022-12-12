@@ -15,6 +15,12 @@
 
         protected override string DoImpl()
         {
+            if (DriverManager.RootElement != null)
+            {
+                return this.JsonResponse(ResponseStatus.Success, DriverManager.RootElement.FrameworkAutomationElement.NativeWindowHandle);
+            }
+            
+            // No RootElement should never be the case?
             var node = AutomationElement.FocusedElement;
             var rootElement = AutomationElement.RootElement;
             var treeWalker = TreeWalker.ControlViewWalker;

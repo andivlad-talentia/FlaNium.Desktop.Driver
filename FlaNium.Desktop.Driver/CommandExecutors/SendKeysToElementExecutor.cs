@@ -14,7 +14,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors
 
             var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey);
                        
-            element.Type(text);
+            element.Type(text, DriverManager);
 
             return this.JsonResponse();
         }

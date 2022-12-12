@@ -6,7 +6,7 @@
     using FlaNium.Desktop.Driver.Common;
     using FlaNium.Desktop.Driver.FlaUI;
     using FlaNium.Desktop.Driver.Input;
-
+    using System;
 
     internal class NewSessionExecutor : CommandExecutorBase
     {
@@ -28,37 +28,22 @@
         {
             var appPath = this.Automator.ActualCapabilities.App;
             var appArguments = this.Automator.ActualCapabilities.Arguments;
-            var debugDoNotDeploy = this.Automator.ActualCapabilities.DebugConnectToRunningApp;
-            var processName = this.Automator.ActualCapabilities.ProcessName;
             var launchDelay = this.Automator.ActualCapabilities.LaunchDelay;
+            var appWindow = this.Automator.ActualCapabilities.AppTopLevelWindow;
+            var hasNoGuiWindow = this.Automator.ActualCapabilities.HasNoGuiWindow;
             
-
-            if (processName.Length == 0)
+            if (appPath != null)
             {
-                DriverManager.StartApp(appPath, appArguments, debugDoNotDeploy);
-                Thread.Sleep(launchDelay);
+                DriverManager.StartApp(appPath, appArguments, ExecutedCommand.SessionId, launchDelay, hasNoGuiWindow);
+            }
+            else if (appWindow!= null)
+            {
+                DriverManager.AttachToWindowHandle(new IntPtr(Convert.ToInt32(appWindow, 16)), ExecutedCommand.SessionId);
             }
             else
             {
-                if (!debugDoNotDeploy)
-                {
-                    DriverManager.CloseDriver();
-                    DriverManager.CloseAllApplication(processName);
-                }
-
-                try
-                {
-                    DriverManager.StartApp(appPath, appArguments, debugDoNotDeploy);
-                }
-                catch
-                {
-                    
-                }
-
-                Thread.Sleep(launchDelay);
-                DriverManager.AttachToProcess(processName);
-                       
-            }               
+                throw new InvalidOperationException("Not sure what to start");
+            }
         }
 
     }

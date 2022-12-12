@@ -1,6 +1,7 @@
 ﻿namespace FlaNium.Desktop.Driver
 {
     using CommandLine;
+    using global::FlaUI.Core.Input;
     using System;
 
     internal class Program
@@ -17,6 +18,13 @@
 
             Console.Write("\n\nPress any key...");
             Console.ReadKey();
+        }
+
+        private static void SetOptions()
+        {
+            // TODO: parametrize?
+            Mouse.MovePixelsPerMillisecond = 5.0;
+            Mouse.MovePixelsPerStep = 50.0;
         }
 
 
@@ -36,7 +44,7 @@
                 Logger.TargetNull();
             }
 
-
+            SetOptions();
             try
             {
                 var listener = new Listener(options.Port);

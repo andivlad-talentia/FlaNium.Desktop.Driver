@@ -82,7 +82,7 @@
             var elementId = args[0]["ELEMENT"].ToString();
 
             var element = this.Automator.ElementsRegistry.GetRegisteredElement(elementId);
-            element.Click();
+            element.Click(this.DriverManager);
             switch (command)
             {
                 case "ctrl_click":

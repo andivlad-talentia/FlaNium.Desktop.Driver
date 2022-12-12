@@ -1,6 +1,9 @@
 ﻿
+using FlaNium.Desktop.Driver.Extensions;
 using FlaNium.Desktop.Driver.FlaUI;
+using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
+using System;
 
 namespace FlaNium.Desktop.Driver.CommandExecutors.Elements.Window
 {
@@ -10,7 +13,14 @@ namespace FlaNium.Desktop.Driver.CommandExecutors.Elements.Window
 
         protected override string DoImpl()
         {
-            DriverManager.GetActiveWindow().Patterns.Window.Pattern.SetWindowVisualState(WindowVisualState.Maximized);
+            try
+            {
+                DriverManager.GetActiveWindow().Patterns.Window.Pattern.SetWindowVisualState(WindowVisualState.Maximized);
+            }
+            catch (InvalidOperationException)
+            {
+                Win32Helper.MaximizeWindow(DriverManager.RootElement.FrameworkAutomationElement.NativeWindowHandle);
+            }
 
             return this.JsonResponse();
         }

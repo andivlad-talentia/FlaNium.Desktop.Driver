@@ -10,7 +10,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors
         {
             if (!this.Automator.ActualCapabilities.DebugConnectToRunningApp)
             {
-                DriverManager.CloseDriver(this.Automator.ActualCapabilities.App.StartsWith("#"));
+                DriverManager?.CloseDriver(this.Automator.ActualCapabilities.App.StartsWith("#"));
 
                 this.Automator.ElementsRegistry.Clear();
             }

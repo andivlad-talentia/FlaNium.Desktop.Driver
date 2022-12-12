@@ -25,14 +25,13 @@
             AutomationElement flaUiElement = element.FlaUIElement;
                
             
-            if (propertyName == "ToggleState")
+            if (propertyName == "ToggleState" || propertyName == "Toggle.ToggleState")
             {
-                var ToggleState = flaUiElement.Patterns.Toggle.PatternOrDefault.ToggleState;
+                var ToggleState = (int)flaUiElement.Patterns.Toggle.PatternOrDefault.ToggleState.Value;
 
                 return this.JsonResponse(ResponseStatus.Success, ToggleState.ToString());
 
             }
-                   
 
             try
             {

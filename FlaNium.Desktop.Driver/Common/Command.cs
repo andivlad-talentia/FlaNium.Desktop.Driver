@@ -1,17 +1,25 @@
 ﻿
 namespace FlaNium.Desktop.Driver.Common
 {
+    using System;
     #region
 
     using System.Collections.Generic;
-
+    using System.Linq;
+    using System.Security.Cryptography;
+    using System.Text.Json;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
+    using NLog.Targets;
+    using OpenQA.Selenium;
+    using JsonSerializer = System.Text.Json.JsonSerializer;
 
     #endregion
 
     public class Command
     {
+        public static readonly JsonSerializerOptions jsonLoadSettings = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
+
         #region Fields
 
         private IDictionary<string, JToken> commandParameters = new JObject();
@@ -73,8 +81,13 @@ namespace FlaNium.Desktop.Driver.Common
         /// <summary>
         /// Gets the SessionID of the command
         /// </summary>
-        [JsonProperty("sessionId")]
+        [JsonProperty("sessionid")]
         public string SessionId { get; set; }
+
+        internal void TrySetSessionIdFromParameters()
+        {
+            SessionId = Parameters.FirstOrDefault(kvp => kvp.Key.ToLower() == "sessionid").Value?.ToString();
+        }
 
         #endregion
     }

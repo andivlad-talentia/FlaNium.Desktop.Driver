@@ -20,12 +20,15 @@ namespace FlaNium.Desktop.Driver.Extensions
             switch (strategy)
             {
                 case "id":
+                case "accessibility id":
                     return new ConditionFactory(new UIA3PropertyLibrary()).ByAutomationId(value);
                 case "name":
                    return new ConditionFactory(new UIA3PropertyLibrary()).ByName(value);
                 case "class name":
                     return new ConditionFactory(new UIA3PropertyLibrary()).ByClassName(value);
-      
+                case "tag name":
+                    return new ConditionFactory(new UIA3PropertyLibrary()).ByLocalizedControlType(value);
+
                 default:
                     throw new NotImplementedException(
                         string.Format("'{0}' is not valid or implemented searching strategy.", strategy));

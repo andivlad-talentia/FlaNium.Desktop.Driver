@@ -9,7 +9,7 @@
             var registeredKey = this.ExecutedCommand.Parameters["ID"].ToString();
 
             var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey);
-            element.Clear();
+            element.Clear(DriverManager);
 
             return this.JsonResponse();
         }
