@@ -30,13 +30,13 @@
             var appArguments = this.Automator.ActualCapabilities.Arguments;
             var launchDelay = this.Automator.ActualCapabilities.LaunchDelay;
             var appWindow = this.Automator.ActualCapabilities.AppTopLevelWindow;
-            var hasNoGuiWindow = this.Automator.ActualCapabilities.HasNoGuiWindow;
-            
+            var mainWindowClassName = this.Automator.ActualCapabilities.MainWindowClassName;
+
             if (appPath != null)
             {
-                DriverManager.StartApp(appPath, appArguments, ExecutedCommand.SessionId, launchDelay, hasNoGuiWindow);
+                DriverManager.StartApp(appPath, appArguments, ExecutedCommand.SessionId, launchDelay, mainWindowClassName);
             }
-            else if (appWindow!= null)
+            else if (appWindow != null)
             {
                 DriverManager.AttachToWindowHandle(new IntPtr(Convert.ToInt32(appWindow, 16)), ExecutedCommand.SessionId);
             }

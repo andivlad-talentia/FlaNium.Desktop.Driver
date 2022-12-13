@@ -19,7 +19,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors.Elements.Window
             }
             catch (InvalidOperationException)
             {
-                Win32Helper.MaximizeWindow(DriverManager.RootElement.FrameworkAutomationElement.NativeWindowHandle);
+                PInvoke.User32.ShowWindow(DriverManager.RootElement.FrameworkAutomationElement.NativeWindowHandle, PInvoke.User32.WindowShowStyle.SW_SHOWMAXIMIZED);
             }
 
             return this.JsonResponse();

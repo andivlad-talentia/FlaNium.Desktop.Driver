@@ -121,7 +121,7 @@ namespace FlaNium.Desktop.Driver.FlaUI
             return RootElement;
         }
 
-        public static DriverManager StartApp(string appPath, string arguments, string sessionId, int launchDelay, bool hasNoGuiWindow)
+        public static void StartApp(string appPath, string arguments, string sessionId, int launchDelay, string mainWindowClassName)
         {
             appPath = appPath.Replace("\\\\", "\\");
             string name = appPath.Substring(appPath.LastIndexOf('\\') + 1);
@@ -163,39 +163,78 @@ namespace FlaNium.Desktop.Driver.FlaUI
                 try
                 {
                     driverManager.Application = Application.Launch(processStartInfo);
-                    if (hasNoGuiWindow)
+                    if (launchDelay == 0)
                     {
-                        return driverManager;
+                        return;
                     }
-                    driverManager.Application.WaitWhileBusy(new TimeSpan?(TimeSpan.FromSeconds(5)));
+                    RetrySettings retrySettings = new RetrySettings()
+                    {
+                        IgnoreException = true,
+                        Timeout = TimeSpan.FromSeconds(launchDelay * 1000),
+                        ThrowOnTimeout = true,
+                        TimeoutMessage = "Unable to start application " + name
+                    };
 
-                    if (driverManager.Application.HasExited)
+                    Retry.While(() =>
                     {
-                        driverManager.Application = Application.AttachOrLaunch(processStartInfo);
-                        driverManager.Application.WaitWhileBusy(new TimeSpan?(TimeSpan.FromSeconds(5)));
-                    }
+                        try
+                        {
+                            driverManager.Application.WaitWhileBusy(new TimeSpan?(TimeSpan.FromSeconds(5)));
+
+                            if (mainWindowClassName != null)
+                            {
+                                var mainWindow = driverManager.Application.GetMainWindow(Automation);
+                                if (mainWindow.ClassName.ToLower() == mainWindowClassName.ToLower())
+                                {
+                                    driverManager.RootElement = mainWindow;
+                                    mainWindow.FindAllChildren();
+                                    return true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                            else
+                            {
+                                Task.Delay(launchDelay * 1000).Wait();
+                                return !driverManager.Application.HasExited;
+                            }
+                        }
+                        catch
+                        {
+                            if (driverManager.Application.HasExited)
+                            {
+                                driverManager.Application = Application.AttachOrLaunch(processStartInfo);
+                                driverManager.Application.WaitWhileBusy(new TimeSpan?(TimeSpan.FromSeconds(5)));
+                            }
+                            return false;
+                        }
+                    },
+                    (rv) => rv == false,
+                    retrySettings);
                 }
                 catch (Win32Exception)
                 {
                     driverManager.CloseDriver();
                 }
             }
-            Task.Delay(launchDelay * 1000).Wait();
-            if (null != driverManager?.Application?.MainWindowHandle)
+            if (null == driverManager.RootElement && null != driverManager?.Application?.MainWindowHandle)
             {
-                var mainWindow = Automation.FromHandle(driverManager.Application.MainWindowHandle).AsWindow();
+                var mainWindow = driverManager.Application.GetMainWindow(Automation);
                 driverManager.RootElement = mainWindow;
                 mainWindow.FindAllChildren();
             }
-            return driverManager;
         }
 
-        public static DriverManager AttachToWindowHandle(IntPtr handle, string sessionId)
+        public static void AttachToWindowHandle(IntPtr handle, string sessionId)
         {
-            return new DriverManager(sessionId)
+            Window targetWindow = null;
+            Retry.WhileException(() => targetWindow = Automation.FromHandle(handle).AsWindow());
+            var driver = new DriverManager(sessionId)
             {
-                RootElement = Automation.FromHandle(handle).AsWindow()
-        };
+                RootElement = targetWindow
+            };
         }
 
         public void Click(Point p)

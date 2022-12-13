@@ -36,11 +36,11 @@
         [JsonProperty("appArguments")]
         public string Arguments { get; set; }
 
+        [JsonProperty("mainWindowClassName")]
+        public string MainWindowClassName { get; set; }
+
         [JsonProperty("debugConnectToRunningApp")]
         public bool DebugConnectToRunningApp { get; set; }
-
-        [JsonProperty("hasNoGuiWindow")]
-        public bool HasNoGuiWindow { get; set; }
 
         [JsonProperty("innerPort")]
         public int InnerPort { get; set; }
