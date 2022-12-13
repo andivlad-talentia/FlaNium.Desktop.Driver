@@ -14,7 +14,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors.Elements.ComboBox
         {
             var registeredKey = this.ExecutedCommand.Parameters["ID"].ToString();
 
-            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey);
+            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey, this.ExecutedCommand.SessionId);
 
             ComboBox comboBox = element.FlaUIElement.AsComboBox();
 
@@ -25,7 +25,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors.Elements.ComboBox
                 throw new AutomationException("Element cannot be found", ResponseStatus.NoSuchElement);
             }
 
-            var itemRegisteredKey = this.Automator.ElementsRegistry.RegisterElement(new FlaUIDriverElement(item));
+            var itemRegisteredKey = this.Automator.ElementsRegistry.RegisterElement(new FlaUIDriverElement(item), this.ExecutedCommand.SessionId);
             
             var registeredObject = new JsonElementContent(itemRegisteredKey);
             

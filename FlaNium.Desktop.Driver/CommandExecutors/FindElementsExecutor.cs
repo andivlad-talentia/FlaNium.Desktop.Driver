@@ -22,7 +22,7 @@
             var searchStrategy = this.ExecutedCommand.Parameters["using"].ToString();
 
 
-            AutomationElement activeWindow = DriverManager.GetActiveWindow();
+            AutomationElement rootElement = DriverManager.GetRootElement();
             AutomationElement[] elements;
 
             if (searchStrategy.Equals("xpath"))
@@ -30,16 +30,19 @@
                 if (searchValue.StartsWith("#"))
                 {
                     searchValue = searchValue.TrimStart('#');
-                    activeWindow = activeWindow.Automation.GetDesktop();
+                    rootElement = rootElement.Automation.GetDesktop();
                 }
 
-                elements = ByXpath.FindAllByXPath(searchValue, activeWindow);
+                elements = ByXpath.FindAllByXPath(searchValue, rootElement);
             }
             else
             {
                 var condition = ByHelper.GetStrategy(searchStrategy, searchValue);
 
-                elements = activeWindow.FindAllDescendants(condition);
+                // For the root session don't search everything as it will timeout
+                elements = (DriverManager.Application == null) ?
+                    rootElement.FindAllChildren(condition) :
+                    rootElement.FindAllDescendants(condition);
             }
 
             if (elements == null)
@@ -52,7 +55,7 @@
                 .Select<AutomationElement, FlaUIDriverElement>((Func<AutomationElement, FlaUIDriverElement>)(x => new FlaUIDriverElement(x)))
                 .ToList<FlaUIDriverElement>();
 
-            var registeredKeys = this.Automator.ElementsRegistry.RegisterElements(flaUiDriverElementList);
+            var registeredKeys = this.Automator.ElementsRegistry.RegisterElements(flaUiDriverElementList, this.ExecutedCommand.SessionId);
 
             var registeredObjects = registeredKeys.Select(e => new JsonElementContent(e));
             return this.JsonResponse(ResponseStatus.Success, registeredObjects);

@@ -13,7 +13,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors.Elements.Thumb
 
             var value = this.ExecutedCommand.Parameters["index"].ToString();
 
-            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey);
+            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey, this.ExecutedCommand.SessionId);
 
             var thumb = element.FlaUIElement.AsThumb();
 

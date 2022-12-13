@@ -13,7 +13,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors.Elements.Window
 
             var alpha = this.ExecutedCommand.Parameters["index"].ToString();
 
-            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey);
+            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey, this.ExecutedCommand.SessionId);
 
             var window = element.FlaUIElement.AsWindow();
 

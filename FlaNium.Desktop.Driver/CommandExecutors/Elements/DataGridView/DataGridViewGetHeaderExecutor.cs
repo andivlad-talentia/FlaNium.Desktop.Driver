@@ -14,7 +14,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors.Elements.DataGridView
         {
             var registeredKey = this.ExecutedCommand.Parameters["ID"].ToString();
 
-            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey);
+            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey, this.ExecutedCommand.SessionId);
 
             DataGridView item = element.FlaUIElement.AsDataGridView();
 
@@ -25,7 +25,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors.Elements.DataGridView
                 throw new AutomationException("Element cannot be found", ResponseStatus.NoSuchElement);
             }
 
-            var itemRegisteredKey = this.Automator.ElementsRegistry.RegisterElement(new FlaUIDriverElement(header));
+            var itemRegisteredKey = this.Automator.ElementsRegistry.RegisterElement(new FlaUIDriverElement(header), this.ExecutedCommand.SessionId);
 
             var registeredObject = new JsonElementContent(itemRegisteredKey);
 

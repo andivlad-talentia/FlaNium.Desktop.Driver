@@ -18,7 +18,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors
 
             var basePoint = this.ExecutedCommand.Parameters["basePoint"].ToString();
 
-            var element = this.Automator.ElementsRegistry.GetRegisteredElement(elementId);
+            var element = this.Automator.ElementsRegistry.GetRegisteredElement(elementId, this.ExecutedCommand.SessionId);
 
             var elX = element.GetRect().X;
             var elY = element.GetRect().Y;

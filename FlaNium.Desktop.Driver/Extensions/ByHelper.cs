@@ -5,6 +5,7 @@ namespace FlaNium.Desktop.Driver.Extensions
 
     using System;
     using global::FlaUI.Core.Conditions;
+    using global::FlaUI.UIA2;
     using global::FlaUI.UIA3;
    
     
@@ -21,13 +22,13 @@ namespace FlaNium.Desktop.Driver.Extensions
             {
                 case "id":
                 case "accessibility id":
-                    return new ConditionFactory(new UIA3PropertyLibrary()).ByAutomationId(value);
+                    return new ConditionFactory(new UIA2PropertyLibrary()).ByAutomationId(value);
                 case "name":
-                   return new ConditionFactory(new UIA3PropertyLibrary()).ByName(value);
+                   return new ConditionFactory(new UIA2PropertyLibrary()).ByName(value);
                 case "class name":
-                    return new ConditionFactory(new UIA3PropertyLibrary()).ByClassName(value);
+                    return new ConditionFactory(new UIA2PropertyLibrary()).ByClassName(value);
                 case "tag name":
-                    return new ConditionFactory(new UIA3PropertyLibrary()).ByLocalizedControlType(value);
+                    return new ConditionFactory(new UIA2PropertyLibrary()).ByLocalizedControlType(value);
 
                 default:
                     throw new NotImplementedException(

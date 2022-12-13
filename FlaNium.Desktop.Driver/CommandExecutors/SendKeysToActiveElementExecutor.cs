@@ -15,7 +15,7 @@
         {               
             var chars = this.ExecutedCommand.Parameters["value"].Select(x => Convert.ToChar(x.ToString()));
 
-            DriverManager.GetActiveWindow().SetForeground();
+            DriverManager.GetRootElement().SetForeground();
 
             this.Automator.FlaNiumKeyboard.SendKeys(chars.ToArray());
 

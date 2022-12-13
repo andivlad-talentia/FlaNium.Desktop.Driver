@@ -17,7 +17,7 @@
         {
             var buttonId = Convert.ToInt32(this.ExecutedCommand.Parameters["button"]);
 
-            DriverManager.GetActiveWindow().SetForeground();
+            DriverManager.GetRootElement().SetForeground();
 
             switch ((MouseButton)buttonId)
             {

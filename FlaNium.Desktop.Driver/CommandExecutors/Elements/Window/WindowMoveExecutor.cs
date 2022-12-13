@@ -14,7 +14,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors.Elements.Window
             var x = this.ExecutedCommand.Parameters["x"].ToString();
             var y = this.ExecutedCommand.Parameters["y"].ToString();
 
-            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey);
+            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey, this.ExecutedCommand.SessionId);
 
             var window = element.FlaUIElement.AsWindow();
 

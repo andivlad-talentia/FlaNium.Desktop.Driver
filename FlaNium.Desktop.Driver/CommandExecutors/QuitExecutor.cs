@@ -9,7 +9,7 @@
             if (!this.Automator.ActualCapabilities.DebugConnectToRunningApp)
             {
                 this.DriverManager?.CloseDriver();
-                this.Automator.ElementsRegistry.Clear();
+                this.Automator.ElementsRegistry.Clear(this.ExecutedCommand.SessionId);
             }
 
             return this.JsonResponse();

@@ -34,10 +34,10 @@
 
             try
             {
-                this.Automator = Automator.InstanceForSession(this.ExecutedCommand.SessionId);
+                this.Automator = Automator.GetInstance();
                 if (this.ExecutedCommand.SessionId == null)
                 {
-                    this.ExecutedCommand.SessionId = this.Automator.Session;
+                    this.ExecutedCommand.SessionId =  Guid.NewGuid().ToString();//this.Automator.Session;
                 }
                 return CommandResponse.Create(HttpStatusCode.OK, this.DoInOtherThread());
             }
@@ -105,7 +105,7 @@
         protected string JsonResponse(ResponseStatus status, object value)
         {
             return JsonConvert.SerializeObject(
-                new JsonResponse(this.Automator.Session, status, value),
+                new JsonResponse(this.ExecutedCommand.SessionId, status, value),
                 Formatting.Indented);
         }
 

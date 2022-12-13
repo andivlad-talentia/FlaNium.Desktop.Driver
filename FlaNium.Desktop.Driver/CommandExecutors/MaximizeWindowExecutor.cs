@@ -15,7 +15,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors.Elements.Window
         {
             try
             {
-                DriverManager.GetActiveWindow().Patterns.Window.Pattern.SetWindowVisualState(WindowVisualState.Maximized);
+                DriverManager.GetRootElement().Patterns.Window.Pattern.SetWindowVisualState(WindowVisualState.Maximized);
             }
             catch (InvalidOperationException)
             {

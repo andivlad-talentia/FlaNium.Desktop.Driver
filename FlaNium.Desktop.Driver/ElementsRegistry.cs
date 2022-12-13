@@ -22,7 +22,7 @@
 
         #region Fields
 
-        private readonly Dictionary<string, FlaUIDriverElement> registeredElements;
+        private readonly Dictionary<string, Dictionary<string, FlaUIDriverElement>> registeredElements;
 
         #endregion
 
@@ -30,16 +30,20 @@
 
         public ElementsRegistry()
         {
-            this.registeredElements = new Dictionary<string, FlaUIDriverElement>();
+            this.registeredElements = new Dictionary<string, Dictionary<string, FlaUIDriverElement>>();
         }
 
         #endregion
 
         #region Public Methods and Operators
 
-        public void Clear()
+        public void Clear(string sessionId)
         {
-            this.registeredElements.Clear();
+            if (this.registeredElements.ContainsKey(sessionId))
+            {
+                this.registeredElements[sessionId].Clear();
+                this.registeredElements.Remove(sessionId);
+            }
         }
 
         /// <summary>
@@ -48,9 +52,9 @@
         /// <exception cref="AutomationException">
         /// Registered element is not found or element has been garbage collected.
         /// </exception>
-        public FlaUIDriverElement GetRegisteredElement(string registeredKey)
+        public FlaUIDriverElement GetRegisteredElement(string registeredKey, string sessionId)
         {
-            var element = this.GetRegisteredElementOrNull(registeredKey);
+            var element = this.GetRegisteredElementOrNull(registeredKey, sessionId);
             if (element != null)
             {
                 return element;
@@ -59,32 +63,48 @@
             throw new AutomationException("Stale element reference", ResponseStatus.StaleElementReference);
         }
 
-        public string RegisterElement(FlaUIDriverElement element)
+        public string RegisterElement(FlaUIDriverElement element, string sessionId)
         {
             Interlocked.Increment(ref safeInstanceCount);
 
             var registeredKey = element.GetHashCode() + "-"
                              + safeInstanceCount.ToString(string.Empty, CultureInfo.InvariantCulture);
-            this.registeredElements.Add(registeredKey, element);
+
+            EnsureSessionRegistry(sessionId);
+            this.registeredElements[sessionId].Add(registeredKey, element);
 
             return registeredKey;
 
         }
 
-        public IEnumerable<string> RegisterElements(IEnumerable<FlaUIDriverElement> elements)
+        public IEnumerable<string> RegisterElements(IEnumerable<FlaUIDriverElement> elements, string sessionId)
         {
-            return elements.Select(this.RegisterElement);
+            EnsureSessionRegistry(sessionId);
+            return elements.Select(e => this.RegisterElement(e, sessionId));
         }
 
         #endregion
 
         #region Methods
 
-        internal FlaUIDriverElement GetRegisteredElementOrNull(string registeredKey)
+        internal FlaUIDriverElement GetRegisteredElementOrNull(string registeredKey, string sessionId)
         {
             FlaUIDriverElement element;
-            this.registeredElements.TryGetValue(registeredKey, out element);
-            return element;
+            if (this.registeredElements.ContainsKey(sessionId))
+            {
+                this.registeredElements[sessionId].TryGetValue(registeredKey, out element);
+                return element;
+            }
+            return null;
+        }
+
+        private void EnsureSessionRegistry(string sessionId)
+        {
+            // Initialize session specific registry
+            if (!this.registeredElements.ContainsKey(sessionId))
+            {
+                this.registeredElements[sessionId] = new Dictionary<string, FlaUIDriverElement>();
+            }
         }
 
         #endregion

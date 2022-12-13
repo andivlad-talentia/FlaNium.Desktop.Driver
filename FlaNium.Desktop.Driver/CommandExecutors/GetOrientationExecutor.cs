@@ -18,7 +18,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors
         {
             var registeredKey = this.ExecutedCommand.Parameters["ID"].ToString();
             
-            FlaUIDriverElement element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey);
+            FlaUIDriverElement element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey, this.ExecutedCommand.SessionId);
 
             AutomationElement flaUiElement = element.FlaUIElement;
 

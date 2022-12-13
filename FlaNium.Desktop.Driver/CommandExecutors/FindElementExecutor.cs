@@ -22,7 +22,7 @@
             var searchStrategy = this.ExecutedCommand.Parameters["using"].ToString();
 
             
-            AutomationElement activeWindow = DriverManager.GetActiveWindow();
+            AutomationElement activeWindow = DriverManager.GetRootElement();
 
             AutomationElement element;
 
@@ -47,7 +47,7 @@
                 throw new AutomationException("Element cannot be found", ResponseStatus.NoSuchElement);
             }
 
-            var registeredKey = this.Automator.ElementsRegistry.RegisterElement(new FlaUIDriverElement(element));
+            var registeredKey = this.Automator.ElementsRegistry.RegisterElement(new FlaUIDriverElement(element), this.ExecutedCommand.SessionId);
             var registeredObject = new JsonElementContent(registeredKey);
             return this.JsonResponse(ResponseStatus.Success, registeredObject);
         }

@@ -19,7 +19,7 @@
         {
             var registeredKey = this.ExecutedCommand.Parameters["ID"].ToString();
 
-            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey).FlaUIElement;
+            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey, this.ExecutedCommand.SessionId).FlaUIElement;
 
                        
             bool? nullable1 = element.Patterns.SelectionItem.PatternOrDefault?.IsSelected?.Value;

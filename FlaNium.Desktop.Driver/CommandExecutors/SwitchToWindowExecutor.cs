@@ -18,7 +18,7 @@
             try
             {
                 DriverManager.SwitchWindow(title);
-                return this.JsonResponse(ResponseStatus.Success, (object)DriverManager.GetActiveWindow().Title);
+                return this.JsonResponse(ResponseStatus.Success, (object)DriverManager.GetRootElement().Title);
             }
             catch (NullReferenceException ex)
             {

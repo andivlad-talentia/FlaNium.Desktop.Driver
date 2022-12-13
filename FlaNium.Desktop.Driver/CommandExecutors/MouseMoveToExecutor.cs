@@ -31,7 +31,7 @@
             if (haveElement)
             {
                 var registeredKey = this.ExecutedCommand.Parameters["element"].ToString();
-                FlaUIDriverElement element = this.Automator.ElementsRegistry.GetRegisteredElementOrNull(registeredKey);
+                FlaUIDriverElement element = this.Automator.ElementsRegistry.GetRegisteredElementOrNull(registeredKey, this.ExecutedCommand.SessionId);
                 
                 if (element != null)
                 {
@@ -52,7 +52,7 @@
                 resultPoint.Y += Convert.ToInt32(this.ExecutedCommand.Parameters["yoffset"]);
             }
 
-            DriverManager.GetActiveWindow();
+            DriverManager.GetRootElement();
 
             Point position = Mouse.Position;
             Point point2 = new Point(resultPoint.X, resultPoint.Y);

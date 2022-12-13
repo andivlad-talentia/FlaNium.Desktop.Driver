@@ -13,7 +13,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors.Elements.TextBox
         {
             var registeredKey = this.ExecutedCommand.Parameters["ID"].ToString();
 
-            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey);
+            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey, this.ExecutedCommand.SessionId);
 
             var textBox = element.FlaUIElement.AsTextBox();
 

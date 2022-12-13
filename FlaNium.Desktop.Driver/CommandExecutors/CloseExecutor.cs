@@ -12,7 +12,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors
             {
                 DriverManager?.CloseDriver(this.Automator.ActualCapabilities.App.StartsWith("#"));
 
-                this.Automator.ElementsRegistry.Clear();
+                this.Automator.ElementsRegistry.Clear(this.ExecutedCommand.SessionId);
             }
 
             return this.JsonResponse();

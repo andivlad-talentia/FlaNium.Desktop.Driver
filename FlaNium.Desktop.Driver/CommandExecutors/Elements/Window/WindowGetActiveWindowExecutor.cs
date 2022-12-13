@@ -10,9 +10,9 @@ namespace FlaNium.Desktop.Driver.CommandExecutors.Elements.Window
 
         protected override string DoImpl()
         {            
-            var activeWindow = DriverManager.GetActiveWindow();
+            var activeWindow = DriverManager.GetRootElement();
 
-            var itemRegisteredKey = this.Automator.ElementsRegistry.RegisterElement(new FlaUIDriverElement(activeWindow));
+            var itemRegisteredKey = this.Automator.ElementsRegistry.RegisterElement(new FlaUIDriverElement(activeWindow), this.ExecutedCommand.SessionId);
 
             var registeredObject = new JsonElementContent(itemRegisteredKey);
 

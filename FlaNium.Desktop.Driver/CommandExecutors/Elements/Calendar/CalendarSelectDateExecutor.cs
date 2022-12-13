@@ -15,7 +15,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors.Elements.Calendar
 
             var value = this.ExecutedCommand.Parameters["dateTime"].ToString();
 
-            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey);
+            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey, this.ExecutedCommand.SessionId);
 
             var calendar = element.FlaUIElement.AsCalendar();
 

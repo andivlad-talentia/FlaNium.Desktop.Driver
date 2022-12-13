@@ -16,7 +16,7 @@
             var imageFormatStr = this.ExecutedCommand.Parameters["format"].ToString();
             var foreground = Boolean.Parse(this.ExecutedCommand.Parameters["foreground"].ToString());
 
-            var element = this.Automator.ElementsRegistry.GetRegisteredElement(elementId);
+            var element = this.Automator.ElementsRegistry.GetRegisteredElement(elementId, this.ExecutedCommand.SessionId);
 
             ImageFormat imageFormat = ImFormat.GetImageFormat(imageFormatStr);
 

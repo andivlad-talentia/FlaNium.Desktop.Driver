@@ -12,7 +12,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors
                        
             var text = string.Join(string.Empty, this.ExecutedCommand.Parameters["value"]);
 
-            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey);
+            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey, this.ExecutedCommand.SessionId);
                        
             element.Type(text, DriverManager);
 

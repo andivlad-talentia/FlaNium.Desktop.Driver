@@ -14,7 +14,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors.Elements.DateTimePicker
 
             var value = this.ExecutedCommand.Parameters["dateTime"].ToString();
 
-            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey);
+            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey, this.ExecutedCommand.SessionId);
 
             var dateTimePicker = element.FlaUIElement.AsDateTimePicker();
 

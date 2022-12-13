@@ -15,7 +15,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors.Elements.Slider
 
             var value = this.ExecutedCommand.Parameters["value"].ToString();
 
-            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey);
+            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey, this.ExecutedCommand.SessionId);
 
             Slider slider = element.FlaUIElement.AsSlider();
 

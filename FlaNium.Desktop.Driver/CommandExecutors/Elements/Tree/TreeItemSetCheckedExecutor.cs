@@ -13,7 +13,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors.Elements.Tree
             
             var value = this.ExecutedCommand.Parameters["value"].ToString();
 
-            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey);
+            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey, this.ExecutedCommand.SessionId);
 
             var treeItem = element.FlaUIElement.AsTreeItem();
 

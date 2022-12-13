@@ -21,7 +21,7 @@
             var searchValue = this.ExecutedCommand.Parameters["value"].ToString();
             var searchStrategy = this.ExecutedCommand.Parameters["using"].ToString();
 
-            var parent = this.Automator.ElementsRegistry.GetRegisteredElement(parentKey);
+            var parent = this.Automator.ElementsRegistry.GetRegisteredElement(parentKey, this.ExecutedCommand.SessionId);
 
             AutomationElement[] elements;
 
@@ -40,7 +40,7 @@
                 .Select<AutomationElement, FlaUIDriverElement>((Func<AutomationElement, FlaUIDriverElement>)(x => new FlaUIDriverElement(x)))
                 .ToList<FlaUIDriverElement>();
 
-            var registeredKeys = this.Automator.ElementsRegistry.RegisterElements(flaUiDriverElementList);
+            var registeredKeys = this.Automator.ElementsRegistry.RegisterElements(flaUiDriverElementList, this.ExecutedCommand.SessionId);
 
             var registeredObjects = registeredKeys.Select(e => new JsonElementContent(e));
             return this.JsonResponse(ResponseStatus.Success, registeredObjects);

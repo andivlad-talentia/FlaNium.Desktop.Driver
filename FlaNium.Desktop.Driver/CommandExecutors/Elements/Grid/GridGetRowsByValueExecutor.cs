@@ -21,7 +21,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors.Elements.Grid
             
             var count = this.ExecutedCommand.Parameters["count"].ToString();
 
-            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey);
+            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey, this.ExecutedCommand.SessionId);
 
             Grid grid = element.FlaUIElement.AsGrid();
 
@@ -31,7 +31,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors.Elements.Grid
                 .Select<AutomationElement, FlaUIDriverElement>((Func<AutomationElement, FlaUIDriverElement>)(x => new FlaUIDriverElement(x)))
                 .ToList<FlaUIDriverElement>();
 
-            var registeredKeys = this.Automator.ElementsRegistry.RegisterElements(flaUiDriverElementList);
+            var registeredKeys = this.Automator.ElementsRegistry.RegisterElements(flaUiDriverElementList, this.ExecutedCommand.SessionId);
 
             var registeredObjects = registeredKeys.Select(e => new JsonElementContent(e));
 

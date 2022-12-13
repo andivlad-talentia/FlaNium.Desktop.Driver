@@ -15,7 +15,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors.Elements.DataGridView
         {
             var registeredKey = this.ExecutedCommand.Parameters["ID"].ToString();
 
-            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey);
+            var element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey, this.ExecutedCommand.SessionId);
 
             DataGridViewRow item = (DataGridViewRow)element.FlaUIElement;
 
@@ -25,7 +25,7 @@ namespace FlaNium.Desktop.Driver.CommandExecutors.Elements.DataGridView
                 .Select<AutomationElement, FlaUIDriverElement>((Func<AutomationElement, FlaUIDriverElement>)(x => new FlaUIDriverElement(x)))
                 .ToList<FlaUIDriverElement>();
 
-            var registeredKeys = Automator.ElementsRegistry.RegisterElements(flaUiDriverElementList);
+            var registeredKeys = Automator.ElementsRegistry.RegisterElements(flaUiDriverElementList, this.ExecutedCommand.SessionId);
 
             var registeredObjects = registeredKeys.Select(e => new JsonElementContent(e));
 

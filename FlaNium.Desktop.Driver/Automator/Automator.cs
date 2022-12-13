@@ -23,9 +23,8 @@ namespace FlaNium.Desktop.Driver.Automator
 
         #region Constructors and Destructors
 
-        public Automator(string session)
+        public Automator()
         {
-            this.Session = session;
             this.ElementsRegistry = new ElementsRegistry();
             this.FlaNiumKeyboard = new FlaNiumKeyboard();
         }
@@ -39,8 +38,6 @@ namespace FlaNium.Desktop.Driver.Automator
         public Application Application { get; set; }
 
         public ElementsRegistry ElementsRegistry { get; private set; }
-
-        public string Session { get; private set; }
 
         public FlaNiumKeyboard FlaNiumKeyboard { get; set; }
 
@@ -56,24 +53,16 @@ namespace FlaNium.Desktop.Driver.Automator
             return valueObject as T;
         }
 
-        public static Automator InstanceForSession(string sessionId)
+        public static Automator GetInstance()
         {
             if (instance == null)
             {
                 lock (LockObject)
                 {
                     if (instance == null)
-                    {
-                        if (sessionId == null)
-                        {
-                            sessionId = Guid.NewGuid().ToString();
-                        }
-
-                        instance = new Automator(sessionId);
-                    }
+                        instance = new Automator();
                 }
             }
-
             return instance;
         }
 

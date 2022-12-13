@@ -20,7 +20,7 @@
             var registeredKey = this.ExecutedCommand.Parameters["ID"].ToString();
             var propertyName = this.ExecutedCommand.Parameters["NAME"].ToString();
 
-            FlaUIDriverElement element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey);
+            FlaUIDriverElement element = this.Automator.ElementsRegistry.GetRegisteredElement(registeredKey, this.ExecutedCommand.SessionId);
 
             AutomationElement flaUiElement = element.FlaUIElement;
                

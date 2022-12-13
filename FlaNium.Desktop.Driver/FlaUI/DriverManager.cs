@@ -96,7 +96,7 @@ namespace FlaNium.Desktop.Driver.FlaUI
             return ((IEnumerable<Window>)allTopLevelWindows).Union<Window>(((IEnumerable<Window>)allTopLevelWindows).SelectMany<Window, Window>((Func<Window, IEnumerable<Window>>)(w => (IEnumerable<Window>)w.ModalWindows))).Where<Window>((Func<Window, bool>)(x => x.Properties.AutomationId?.ValueOrDefault != DriverManager.AutomationIdWindowForIgnore)).ToArray<Window>();
         }
 
-        public Window GetActiveWindow()
+        public Window GetRootElement()
         {
             if (RootElement == null)
             {
@@ -130,6 +130,7 @@ namespace FlaNium.Desktop.Driver.FlaUI
             if (appPath.ToLower() == ROOT_APP_NAME)
             {
                 driverManager.RootElement = Automation.GetDesktop().AsWindow();
+                driverManager.RootElement.FindAllChildren();
                 launchDelay = 0;
             } 
             else if (!File.Exists(appPath))
@@ -199,7 +200,7 @@ namespace FlaNium.Desktop.Driver.FlaUI
 
         public void Click(Point p)
         {
-            (GetActiveWindow() as Window)?.SetForeground();
+            (GetRootElement() as Window)?.SetForeground();
             Mouse.Position = p;
             Mouse.Click(MouseButton.Left);
         }

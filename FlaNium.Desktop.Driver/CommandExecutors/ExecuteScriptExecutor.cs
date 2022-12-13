@@ -63,7 +63,7 @@
             var args = (JArray)this.ExecutedCommand.Parameters["args"];
             var elementId = args[0]["ELEMENT"].ToString();
 
-            var element = this.Automator.ElementsRegistry.GetRegisteredElement(elementId);
+            var element = this.Automator.ElementsRegistry.GetRegisteredElement(elementId, this.ExecutedCommand.SessionId);
 
             switch (command)
             {
@@ -81,7 +81,7 @@
             var args = (JArray)this.ExecutedCommand.Parameters["args"];
             var elementId = args[0]["ELEMENT"].ToString();
 
-            var element = this.Automator.ElementsRegistry.GetRegisteredElement(elementId);
+            var element = this.Automator.ElementsRegistry.GetRegisteredElement(elementId, this.ExecutedCommand.SessionId);
             element.Click(this.DriverManager);
             switch (command)
             {
