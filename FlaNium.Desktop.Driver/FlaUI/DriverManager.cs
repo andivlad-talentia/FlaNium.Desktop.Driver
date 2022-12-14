@@ -170,7 +170,7 @@ namespace FlaNium.Desktop.Driver.FlaUI
                     RetrySettings retrySettings = new RetrySettings()
                     {
                         IgnoreException = true,
-                        Timeout = TimeSpan.FromSeconds(launchDelay * 1000),
+                        Timeout = TimeSpan.FromSeconds(launchDelay),
                         ThrowOnTimeout = true,
                         TimeoutMessage = "Unable to start application " + name
                     };
@@ -227,14 +227,25 @@ namespace FlaNium.Desktop.Driver.FlaUI
             }
         }
 
-        public static void AttachToWindowHandle(IntPtr handle, string sessionId)
+        public static void AttachToWindowHandle(IntPtr handle, string sessionId, int launchDelay)
         {
-            Window targetWindow = null;
-            Retry.WhileException(() => targetWindow = Automation.FromHandle(handle).AsWindow());
-            var driver = new DriverManager(sessionId)
+            RetrySettings retrySettings = new RetrySettings()
             {
-                RootElement = targetWindow
+                IgnoreException = true,
+                Timeout = TimeSpan.FromSeconds(launchDelay),
+                ThrowOnTimeout = true,
+                TimeoutMessage = "Unable to attach to window with handle " + handle.ToString()
             };
+            var driverManager = new DriverManager(sessionId);
+            Retry.WhileException(() =>
+            {
+                var mainWindow = Automation.FromHandle(handle).AsWindow();
+                driverManager.Application = Application.Attach(mainWindow.Properties.ProcessId);
+                driverManager.RootElement = mainWindow;
+                mainWindow.FindAllChildren();
+
+            },
+            TimeSpan.FromSeconds(launchDelay));
         }
 
         public void Click(Point p)

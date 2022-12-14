@@ -32,13 +32,13 @@
             var appWindow = this.Automator.ActualCapabilities.AppTopLevelWindow;
             var mainWindowClassName = this.Automator.ActualCapabilities.MainWindowClassName;
 
-            if (appPath != null)
+            if (!string.IsNullOrEmpty(appPath))
             {
                 DriverManager.StartApp(appPath, appArguments, ExecutedCommand.SessionId, launchDelay, mainWindowClassName);
             }
             else if (appWindow != null)
             {
-                DriverManager.AttachToWindowHandle(new IntPtr(Convert.ToInt32(appWindow, 16)), ExecutedCommand.SessionId);
+                DriverManager.AttachToWindowHandle(new IntPtr(Convert.ToInt32(appWindow, 16)), ExecutedCommand.SessionId, launchDelay);
             }
             else
             {
